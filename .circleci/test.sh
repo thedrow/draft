@@ -9,8 +9,8 @@ cd "$DRAFT_ROOT"
 run_unit_test() {
   echo "Running unit tests"
   go get -u github.com/jstemmer/go-junit-report
-  trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
-  make test-unit | tee ${TEST_RESULTS}/go-test.out
+  trap "go-junit-report </tmp/test-results/go-test.out > /tmp/test-results/go-test-report.xml" EXIT
+  make test-unit | tee /tmp/test-results/go-test.out
 }
 
 run_style_check() {
