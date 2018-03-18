@@ -2,13 +2,13 @@ package draft
 
 import (
 	"bytes"
-	"crypto/sha1"
 	"fmt"
 	"io"
 	"math/rand"
 	"strconv"
 	"time"
 
+	"github.com/cespare/xxhash"
 	"github.com/oklog/ulid"
 
 	"k8s.io/helm/pkg/chartutil"
@@ -37,14 +37,14 @@ func newAppContext(s *Server, req *rpc.UpRequest, out io.Writer) (*AppContext, e
 	raw := bytes.NewBuffer(req.AppArchive.Content)
 	// write build context to a buffer so we can also write to the sha1 hash.
 	b := new(bytes.Buffer)
-	h := sha1.New()
+	h := xxhash.New()
 	w := io.MultiWriter(b, h)
 	if _, err := io.Copy(w, raw); err != nil {
 		return nil, err
 	}
 	// truncate checksum to the first 40 characters (20 bytes) this is the
 	// equivalent of `shasum build.tar.gz | awk '{print $1}'`.
-	ctxtID := h.Sum(nil)
+	ctxtID := h.Sum64()
 	imgtag := fmt.Sprintf("%.20x", ctxtID)
 	image := fmt.Sprintf("%s/%s:%s", s.cfg.Registry.URL, req.AppName, imgtag)
 
